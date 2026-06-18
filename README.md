@@ -1,4 +1,20 @@
-# DO-ALL: Distill Once, Adapt Life-Long
+<br/>
+  <h1 align="center" style="font-size: 1.7rem">DO-ALL: Distill Once, Adapt Life-Long</h1>
+  <p align="center">
+  ECCV 2026
+  </p>
+  <p align="center">
+    <a href="https://blue-531.github.io/">Hyun-Kurl Jang*</a>,
+    <a href="https://jihun1998.github.io/">Jihun Kim*</a>,
+    <a href="https://sangrockeg.github.io/">Hyeokjun Kweon*</a>,
+    Kuk-Jin Yoon
+  </p>
+  <p align="center">
+    * denotes equal contribution
+  </p>
+</p>
+
+---
 
 Reference code for **DO-ALL**, a plug-and-play module for Continual Test-Time Adaptation
 (CTTA) that revisits source information through **Dataset Distillation (DD)**.
