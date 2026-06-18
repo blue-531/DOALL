@@ -16,7 +16,7 @@
 
 ---
 
-Reference code for **DO-ALL**, a plug-and-play module for Continual Test-Time Adaptation
+Official code for **DO-ALL**, a plug-and-play module for Continual Test-Time Adaptation
 (CTTA) that revisits source information through **Dataset Distillation (DD)**.
 
 Before deployment, DO-ALL distills the source dataset into a compact set of **synthetic
