@@ -18,8 +18,9 @@
     </a>
   </p>
 </p>
-
----
+<p align="center">
+  <img src="assets/do_all_demo_v2.gif" width="90%" alt="DO-ALL demo">
+</p>
 
 Official code for **DO-ALL**, a plug-and-play module for Continual Test-Time Adaptation
 (CTTA) that revisits source information through **Dataset Distillation (DD)**.
