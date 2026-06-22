@@ -12,6 +12,11 @@
   <p align="center">
     * denotes equal contribution
   </p>
+  <p align="center">
+    <a href="https://arxiv.org/abs/2606.20196">
+      <img src='https://img.shields.io/badge/Paper-PDF-red?style=flat&logo=arXiv&logoColor=red' alt='Paper PDF'>
+    </a>
+  </p>
 </p>
 
 ---
@@ -25,45 +30,6 @@ replay**, **feature alignment**, and
 **harm-adaptive blending** that rewinds unstable parameter groups toward the source model.
 DO-ALL plugs into any base CTTA method *without changing its objective*.
 
-This repo is built on the upstream
-[test-time-adaptation](https://github.com/mariodoebler/test-time-adaptation)
-## Quick start
-
-```bash
-# baseline
-python test_time.py --cfg cfgs/imagenet_c/roid.yaml
-
-# the SAME baseline + DO-ALL (one flag)
-python test_time.py --cfg cfgs/imagenet_c/roid.yaml --do_all --synpath ./WMDD_imagenet/IPC_10/23
-```
-
-`--do_all` enables the plug-in; `--synpath <root>/IPC_<N>/<exp>` points at the DD anchor
-ImageFolder (`N` = images-per-class); `--stride k` runs the anchor branch every `k` steps
-(Table 6). All three are also settable in a config under the `DOALL` node.
-
-Reproduce all of Table 2 (3 baselines + 3 `+DO-ALL`):
-
-```bash
-bash run_table2.sh        # writes run_logs/<method>.log; prints mean error per run
-```
-
-## How DO-ALL plugs in
-
-DO-ALL lives entirely in **[`methods/do_all.py`](methods/do_all.py)** (a `DOALL` class with its
-own frozen source copy + DD anchor bank). Each baseline adds the *same* 3 lines:
-
-```python
-# __init__:
-self.do_all = DOALL(self, cfg, num_classes) if cfg.DOALL.ENABLED else None
-# top of forward_and_adapt(self, x):
-if self.do_all is not None and self.do_all.should_run():
-    self.do_all.anchor_update(x)          # anchor objective + harm-aware rewind
-```
-
-So `methods/{eata,roid,rmt}.py` are the upstream baselines plus this hook; nothing else
-changes. See [`methods/OURS_METHOD.md`](methods/OURS_METHOD.md) for the full method and
-hyper-parameters (KD T=5, weights `W_CE=1, W_MMD=10, W_MIX=1`, rewind `β_max=0.05, β_s=5`).
-
 ## Installation
 
 ```bash
@@ -72,21 +38,83 @@ pip install torch==2.3.1 torchvision==0.18.1   # match your CUDA build
 pip install -r requirements.txt
 ```
 
-## Required data & assets
+## Data
 
-Paths resolve from `cfg.DATA_DIR` (default `./data`) and `--synpath`.
+| Dataset | Download | Expected location |
+|---------|----------|-------------------|
+| **CIFAR10-C / CIFAR100-C** | Auto-downloaded on first run | `./data/` (managed automatically) |
+| **ImageNet-C** | [ImageNet-C](https://zenodo.org/record/2235448#.Yj2RO_co_mF) | `./data/ImageNet-C/<corruption>/<severity>/...` |
+| **CCC** | [CCC](https://github.com/oripress/CCC) | `./data/CCC` |
 
-| Asset | Needed by | Where |
-|-------|-----------|-------|
-| **ImageNet-C** (test) | all | `./data/ImageNet-C/<corruption>/<severity>/...` — [zenodo 2235448](https://zenodo.org/records/2235448) |
-| **ImageNet train** (source) | EATA*, RMT* | `./data/imagenet2012/` — EATA Fisher / RMT warm-up + prototypes. Not needed by ROID. |
-| **DD source anchors** | any `--do_all` run | `--synpath <root>/IPC_<N>/<exp>` — ImageFolder of distilled images (WMDD / SRe²L / DELT, or a coreset with `CORESET` in the path). |
+## Pre-trained model weights
 
-The ResNet-50 backbone is `torchvision IMAGENET1K_V1` (auto-downloaded). RMT also writes/reads a
-warm-up checkpoint + prototypes under `./ckpt/` (regenerated from ImageNet-train if absent).
+All backbones are the standard public checkpoints used by the upstream benchmark and are
+**auto-downloaded** on first run — no manual setup:
 
+| Benchmark | Backbone | Weights (`MODEL.ARCH`) | Source |
+|-----------|----------|------------------------|--------|
+| ImageNet-C / CCC | ResNet-50 | `resnet50`, `IMAGENET1K_V1` | torchvision |
+| CIFAR10-C | WRN-28-10 | `Standard` | RobustBench |
+| CIFAR100-C | ResNeXt-29 | `Hendrycks2020AugMix_ResNeXt` | RobustBench |
 
+## DD source anchors
+
+The distilled source anchors are released on Google Drive:
+
+> **Download:** `<TODO: Google-Drive link>` — unpack into `./DD_anchor/`.
+
+Each set is named `{dataset}_{DDmethod}_{backbone}`. Every distilled image carries its source soft label as a sibling
+`.pt`. Point `--synpath` at an IPC folder whose `{dataset}_{backbone}` matches the benchmark you run.
+
+| Anchor set | Benchmark | DD method |
+|------------|-----------|-----------|
+| `imagenet_WMDD_resnet50/IPC_10`  | ImageNet-C / CCC (ResNet-50) | WMDD |
+| `imagenet_SRe2L_resnet50/IPC_10` | ImageNet-C / CCC (ResNet-50) | SRe²L |
+| `imagenet_DELT_resnet50/IPC_10`  | ImageNet-C / CCC (ResNet-50) | DELT |
+| `cifar100_WMDD_resnext/IPC_10`   | CIFAR100-C (ResNeXt-29) | WMDD |
+| `cifar100_SRe2L_resnext/IPC_10`  | CIFAR100-C (ResNeXt-29) | SRe²L |
+| `cifar100_DELT_resnext/IPC_10`   | CIFAR100-C (ResNeXt-29) | DELT |
+
+Example: `--synpath ./DD_anchor/imagenet_WMDD_resnet50/IPC_10`.
+
+## Quick start
+
+```bash
+# baseline (upstream CTTA method)
+python test_time.py --cfg cfgs/imagenet_c/roid.yaml
+
+# the SAME baseline + DO-ALL — one flag
+python test_time.py --cfg cfgs/imagenet_c/roid.yaml \
+    --do_all --synpath ./DD_anchor/imagenet_WMDD_resnet50/IPC_10
+```
+
+| Flag | Meaning |
+|------|---------|
+| `--do_all` | Enable the DO-ALL plug-in (sets `cfg.DOALL.ENABLED`). |
+| `--synpath <root>/IPC_<N>` | DD anchor `ImageFolder` (`N` = images-per-class). Required with `--do_all`. |
+| `--stride k` | Run the anchor branch every `k` steps for cheaper adaptation. |
+
+### Reproduce Table 2 (ImageNet-to-ImageNet-C, ResNet-50, severity 5, continual)
+
+```bash
+SYN_ROOT=./DD_anchor/imagenet_WMDD_resnet50 GPU=0 bash run_table2.sh
+# runs the 3 baselines + their 3 +DO-ALL variants; writes run_logs/<method>.log
+```
 
 ## Acknowledgements
 
-Built on [mariodoebler/test-time-adaptation](https://github.com/mariodoebler/test-time-adaptation). We thank the authors for releasing their code.
+Built on [mariodoebler/test-time-adaptation](https://github.com/mariodoebler/test-time-adaptation)
+(EATA, ROID, RMT, and RobustBench utilities). We thank the authors for releasing their code.
+
+## Citation
+
+If you find this work useful, please cite:
+
+```bibtex
+@article{jang2026distill,
+  title={Distill Once, Adapt Life-Long: Exploring Dataset Distillation for Continual Test-Time Adaptation},
+  author={Jang, Hyun-Kurl and Kim, Jihun and Kweon, Hyeokjun and Yoon, Kuk-Jin},
+  journal={arXiv preprint arXiv:2606.20196},
+  year={2026}
+}
+```
