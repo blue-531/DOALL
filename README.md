@@ -19,6 +19,12 @@
   </p>
 </p>
 
+<p align="center">
+  <img src="assets/do_all_demo_v2.gif" width="90%" alt="DO-ALL demo">
+  <br/>
+  <em>▶ <a href="assets/do_all_demo_v2.mp4">Watch the demo (MP4)</a></em>
+</p>
+
 ---
 
 Official code for **DO-ALL**, a plug-and-play module for Continual Test-Time Adaptation
