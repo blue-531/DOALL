@@ -1,5 +1,5 @@
 <br/>
-  <h1 align="center" style="font-size: 1.7rem">DO-ALL: Distill Once, Adapt Life-Long</h1>
+  <h1 align="center" style="font-size: 1.7rem">Distill Once, Adapt Life-Long: Exploring Dataset Distillation for Continual Test-Time Adaptation</h1>
   <p align="center">
   ECCV 2026
   </p>
