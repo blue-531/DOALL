@@ -1,0 +1,15 @@
+# Install a CUDA-matched PyTorch first (https://pytorch.org). Validated with:
+torch==2.3.1
+torchvision==0.18.1
+numpy==1.26.4
+timm==1.0.19
+scikit-learn==1.5.1
+Pillow==10.2.0
+yacs==0.1.8
+iopath==0.1.10
+tqdm==4.66.5
+tensorboard==2.11.2
+pandas==2.3.1
+scipy==1.13.1
+ftfy==6.3.1
+regex==2024.7.24

@@ -1,0 +1,20 @@
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Data / anchors / checkpoints / outputs (provide or regenerate separately)
+data/
+WMDD_imagenet/
+ckpt/
+output/
+run_logs/
+*.zip
+*.tar
+*.tar.gz
+*.pth
+*.pt
+
+.DS_Store
+.vscode/
+.idea/
+DD_anchor/
