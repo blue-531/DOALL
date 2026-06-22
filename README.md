@@ -61,7 +61,7 @@ All backbones are the standard public checkpoints used by the upstream benchmark
 
 The distilled source anchors are released on Google Drive:
 
-> **Download:** `<TODO: Google-Drive link>` — unpack into `./DD_anchor/`.
+[**Download**](https://drive.google.com/file/d/1YRb06F0teMukNQG8YnBmr2KiMw5apFa2/view?usp=sharing) — unpack into `./DD_anchor/`.
 
 Each set is named `{dataset}_{DDmethod}_{backbone}`. Every distilled image carries its source soft label as a sibling
 `.pt`. Point `--synpath` at an IPC folder whose `{dataset}_{backbone}` matches the benchmark you run.
